@@ -1,0 +1,89 @@
+version: '2'
+services:
+  # PHP Service
+  ava-php:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    container_name: ava-php
+    tty: true
+    restart: always
+    environment:
+      SERVICE_NAME: ava-php
+      SERVICE_TAGS: dev
+    working_dir: /var/www/server
+    volumes:
+      - ./laravel:/var/www/server
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - ava-network
+    depends_on:
+      - ava-mysql
+#    command: /bin/bash -c "php-fpm | /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf"
+    command: /bin/bash -c "php-fpm"
+
+  # Nginx Service
+  ava-nginx:
+    build:
+      context: ./
+      dockerfile: webserver.dockerfile
+    container_name: ava-nginx
+    tty: true
+    restart: always
+    ports:
+      - "8082:80"
+    volumes:
+      - ./laravel:/var/www/server
+    depends_on:
+      - ava-php
+    networks:
+      - ava-network
+#
+#  # MySQL Service
+  ava-mysql:
+    image: mysql:8.0
+    container_name: ava-mysql
+    restart: always
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "33068:3306"
+    volumes:
+      - ava_mysql:/var/lib/mysql/
+      - ./dbs:/docker-entrypoint-initdb.d
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - ava-network
+#phpmyadmin
+  ava-phpmyadmin:
+    depends_on:
+      - ava-mysql
+    image: phpmyadmin/phpmyadmin
+    container_name: ava-phpmyadmin
+    links:
+      - ava-mysql
+    environment:
+      PMA_HOST: ava-mysql
+      MYSQL_ROOT_PASSWORD: password
+    restart: always
+    ports:
+      - "8088:80"
+    networks:
+      - ava-network
+#redis
+  ava-redis:
+    image: redis:latest
+    container_name: ava-redis
+    restart: always
+    volumes:
+      - ./redis/data:/data
+    ports:
+      - "6369:6378"
+networks:
+  ava-network:
+    driver: bridge
+
+volumes:
+  ava_mysql:
+    driver: local
