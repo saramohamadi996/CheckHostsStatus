@@ -32,9 +32,10 @@ configured. You can install Redis using Docker or directly on your machine.
 Run Migrations:
 bash
 Copy code
-docker-compose exec app php artisan migrate
+docker-compose exec app php artisan migrate --seed
 This will set up the database schema.
 Start the Scheduler:
+[App\Console\Commands\CheckHostsStatus]() and  [App\Console\Kernel]()
 The scheduler is responsible for running the host status check every five minutes.
 bash
 Copy code
@@ -43,6 +44,7 @@ Access the Application:
 Once the containers are up and running, you can access the application in your browser
 at http://localhost:8082/hosts/status.
 Implementation Details
+
 Docker Setup
 The application is containerized using Docker to ensure consistency across different environments. Docker Compose is
 used to manage the containers.

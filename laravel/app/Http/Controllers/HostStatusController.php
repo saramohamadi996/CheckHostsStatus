@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HostStatusController extends Controller
 {
+    //please check this file App\Console\Commands\CheckHostsStatus and  App\Console\Kernel
     public function checkHosts()
     {
         $hostStatuses = Cache::remember('host_statuses', 5 * 60, function () {
